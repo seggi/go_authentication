@@ -1,17 +1,20 @@
 package main
 
 import (
+	"fuko_backend/infrastructure"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	r := gin.Default()
+	router := gin.Default()
 
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"data": "Fuko Banckend"})
+	router.GET("/", func(context *gin.Context) {
+		infrastructure.LoadEnv()
+		infrastructure.FukoDatabase()
+		context.JSON(http.StatusOK, gin.H{"data": "Fuko Banckend"})
 	})
 
-	r.Run()
+	router.Run(":8000")
 }
