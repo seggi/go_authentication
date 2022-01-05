@@ -1,20 +1,29 @@
 package main
 
 import (
+	"fuko_backend/api/controller"
+	"fuko_backend/api/repository"
+	"fuko_backend/api/routes"
+	"fuko_backend/api/service"
 	"fuko_backend/infrastructure"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
+	"fuko_backend/models"
 )
 
+func init() {
+	infrastructure.LoadEnv()
+}
+
 func main() {
-	router := gin.Default()
+	router := infrastructure.FukoGinRouter()
+	db := infrastructure.FukoDatabase()
 
-	router.GET("/", func(context *gin.Context) {
-		infrastructure.LoadEnv()
-		infrastructure.FukoDatabase()
-		context.JSON(http.StatusOK, gin.H{"data": "Fuko Banckend"})
-	})
+	postRepository := repository.FukoUserRepository(db)
+	postService := service.FukoUserService(postRepository)
+	postController := controller.FukoUserController(postService)
+	postRoute := routes.FukoUserRoute(postController, router)
+	postRoute.Setup()
 
-	router.Run(":8000")
+	db.DB.AutoMigrate(&models.User{})
+
+	router.Gin.Run(":8000")
 }
